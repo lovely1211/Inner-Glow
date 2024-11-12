@@ -1,0 +1,9 @@
+  .emoji-item {
+    cursor: pointer;
+    transition: transform 0.3s ease;
+  }
+  
+  .emoji-item.selected {
+    transform: scale(1.3);
+  }
+  
