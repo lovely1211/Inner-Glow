@@ -7,7 +7,8 @@ const emotionRoutes = require('./routes/emotion');
 const serviceRoutes = require('./service/siteQuery');
 const chatRoutes = require('./routes/vent');
 const chartRoutes = require('./routes/chart');
-const progressRoutes = require('./routes/progress')
+const progressRoutes = require('./routes/progress');
+const mindcareRoutes = require('./routes/mindcare')
 
 require('dotenv').config();
 
@@ -36,6 +37,7 @@ app.use("/api/service", serviceRoutes);
 app.use('/api', chatRoutes);
 app.use('/api', chartRoutes);
 app.use('/api', progressRoutes);
+app.use('/api', mindcareRoutes);
 
 // Error handler middleware
 app.use(errorHandler);

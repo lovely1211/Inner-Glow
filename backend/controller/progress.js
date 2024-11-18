@@ -10,28 +10,26 @@ exports.getEmotionProgress = async (req, res) => {
       return res.status(400).json({ message: "Invalid user ID format" });
     }
 
-    // Aggregate emotions by date and emotion type
+    // Aggregate emotions to calculate the total count of each emotion type
     const emotions = await Emotion.aggregate([
       { $match: { userId: new mongoose.Types.ObjectId(userId) } },
       {
         $group: {
-          _id: {
-            date: { $dateToString: { format: "%Y-%m-%d", date: "$date" } },
-            emotion: "$emotion",
-          },
+          _id: "$emotion",
           count: { $sum: 1 },
         },
       },
-      { $sort: { "_id.date": 1 } } // Sort by date in ascending order
     ]);
 
-    // Format the response to be suitable for the frontend
-    const formattedData = emotions.reduce((acc, item) => {
-      const { date, emotion } = item._id;
-      if (!acc[date]) acc[date] = {};
-      acc[date][emotion] = item.count;
-      return acc;
-    }, {});
+    // Calculate the total count of all emotions combined
+    const totalEmotions = emotions.reduce((sum, item) => sum + item.count, 0);
+
+    // Format the response for the frontend
+    const formattedData = emotions.map(item => ({
+      emotion: item._id,
+      count: item.count,
+      percentage: ((item.count / totalEmotions) * 100).toFixed(2), // Calculate percentage
+    }));
 
     res.status(200).json(formattedData);
   } catch (err) {

@@ -6,7 +6,7 @@ const authMiddleware = require('../middleware/error');
 const { getEmotionsForLastSevenDays, getEmotionsForLastThirtyDays } = require('../controller/chart');
 
 // Route for fetching last seven days of emotions
-router.get('/emotion/last-seven-days/:id', async (req, res) => {
+router.get('/emotion/last-seven-days/:id', authMiddleware, async (req, res) => {
     try {
         const userId = req.params.id;
 
@@ -14,6 +14,9 @@ router.get('/emotion/last-seven-days/:id', async (req, res) => {
             throw new Error('Invalid userId format');
         }
         const emotions = await getEmotionsForLastSevenDays(userId);
+        if (!emotions) {
+            return res.status(404).json({ message: 'No emotions found weekly' });
+        }
         res.status(200).json(emotions);
     } catch (error) {
         console.error('Error fetching last seven days of emotions:', error);
@@ -22,7 +25,7 @@ router.get('/emotion/last-seven-days/:id', async (req, res) => {
 });
 
 // Route for fetching last thirty days of emotions
-router.get('/emotion/last-thirty-days/:id', async (req, res) => {
+router.get('/emotion/last-thirty-days/:id', authMiddleware, async (req, res) => {
     try {
         const userId = req.params.id;
 
@@ -31,6 +34,9 @@ router.get('/emotion/last-thirty-days/:id', async (req, res) => {
         }
 
         const emotions = await getEmotionsForLastThirtyDays(userId);
+        if (!emotions) {
+            return res.status(404).json({ message: 'No emotions found monthly' });
+        }
         res.status(200).json(emotions);
     } catch (error) {
         console.error('Error fetching last thirty days of emotions:', error);

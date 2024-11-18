@@ -1,43 +1,53 @@
 const axios = require('axios');
+const Chat = require('../model/vent'); 
 
-const OPENAI_KEY = process.env.OPENAI_API_KEY; 
+const HF_TOKEN = process.env.HF_TOKEN;
 
 exports.chatWithMe = async (req, res) => {
-    const { message } = req.body;
-    console.log("Received message:", message);
+    const { message, userId } = req.body; 
 
-    const maxRetries = 3;
-    let attempt = 0;
-
-    while (attempt < maxRetries) {
-        try {
-            const response = await axios.post(
-                'https://api.openai.com/v1/chat/completions',
-                {
-                    model: 'gpt-3.5-turbo', // or 'gpt-4' if you have access
-                    messages: [{ role: 'user', content: message }],
-                },
-                {
-                    headers: {
-                        'Authorization': `Bearer ${OPENAI_KEY}`,
-                        'Content-Type': 'application/json',
-                    },
-                }
-            );
-
-            console.log("ChatGPT response:", response.data); 
-            return res.json({ reply: response.data.choices[0].message.content });
-        } catch (error) {
-            console.log("ChatGPT API error:", error);
-            if (error.response && error.response.status === 429) {
-                await new Promise(resolve => setTimeout(resolve, 1000));
-                attempt++;
-            } else {
-                return res.status(500).json({ error: "Error communicating with ChatGPT API" });
-            }
-        }
+    if (!userId) {
+        return res.status(400).json({ error: 'User ID is required' });
     }
 
-    return res.status(429).json({ error: "Rate limit exceeded, please try again later." });
+    try {
+        const response = await axios.post(
+            'https://api-inference.huggingface.co/models/facebook/blenderbot-400M-distill',
+            { inputs: message },
+            {
+                headers: {
+                    'Authorization': `Bearer ${HF_TOKEN}`,
+                    'Content-Type': 'application/json',
+                },
+            }
+        );
+
+        // Extract generated text safely
+        const replyText = response.data[0]?.generated_text || "No reply generated";
+
+        // Save chat to the database
+        const chat = new Chat({
+            userId,
+            message,
+            reply: replyText, // Ensure this is a string
+        });
+
+        await chat.save();
+        return res.json({ reply: replyText });
+    } catch (error) {
+        console.error("Error with Hugging Face API:", error.response ? error.response.data : error.message);
+        return res.status(500).json({ error: "Error communicating with Hugging Face API" });
+    }
 };
 
+exports.getChatHistory = async (req, res) => {
+    const { userId } = req.params;
+
+    try {
+        const chatHistory = await Chat.find({ userId }).sort({ timestamp: -1 });
+        return res.json(chatHistory);
+    } catch (error) {
+        console.error('Error fetching chat history:', error.message);
+        return res.status(500).json({ error: 'Error fetching chat history' });
+    }
+};
