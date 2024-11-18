@@ -2,22 +2,18 @@ import React, { useEffect, useState } from 'react';
 import axiosInstance from '../../../axiosInstance';
 import {
   Chart as ChartJS,
-  LineElement,
-  PointElement,
-  LineController,
+  BarElement,
   CategoryScale,
   LinearScale,
   Title,
   Tooltip,
   Legend,
 } from 'chart.js';
-import { Line } from 'react-chartjs-2';
+import { Bar } from 'react-chartjs-2';
 
 // Register Chart.js components
 ChartJS.register(
-  LineElement,
-  PointElement,
-  LineController,
+  BarElement,
   CategoryScale,
   LinearScale,
   Title,
@@ -25,31 +21,31 @@ ChartJS.register(
   Legend
 );
 
-const EmotionProgressChart = ({ userId }) => {
-  const [emotionData, setEmotionData] = useState({});
+const EmotionSummaryChart = () => {
+  const [emotionData, setEmotionData] = useState([]);
 
   useEffect(() => {
-    axiosInstance.get(`/progress/${userId}`)
+    const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+    axiosInstance.get(`/progress/${userInfo.id}`)
       .then(response => {
         setEmotionData(response.data);
       })
       .catch(err => console.error(err));
-  }, [userId]);
+  }, []);
 
   // Prepare data for the chart
-  const dates = Object.keys(emotionData);
-  const emotionTypes = [
-    "Happy", "Sad", "Angry", "Relaxed", "Stressed", "Crying", "Loving", "Fear", "Disgust", "Surprise"
-  ];
+  const labels = emotionData.map(item => item.emotion);
+  const percentages = emotionData.map(item => parseFloat(item.percentage)); // Use percentages
 
   const chartData = {
-    labels: dates,
-    datasets: emotionTypes.map((emotion, index) => ({
-      label: emotion,
-      data: dates.map(date => emotionData[date][emotion] || 0),
-      borderColor: `hsl(${index * 36}, 70%, 50%)`,
-      fill: false,
-    })),
+    labels: labels,
+    datasets: [
+      {
+        label: 'Emotion Percentage (%)',
+        data: percentages,
+        backgroundColor: '#FF8042',
+      },
+    ],
   };
 
   const options = {
@@ -57,16 +53,22 @@ const EmotionProgressChart = ({ userId }) => {
     scales: {
       y: {
         beginAtZero: true,
+        max: 100, 
+        ticks: {
+          callback: function(value) {
+            return value + '%'; 
+          }
+        }
       },
     },
   };
 
   return (
     <div>
-      <h2 className='text-center font-bold text-xl my-4'>Emotion Progress Chart</h2>
-      <Line data={chartData} options={options} />
+      <h2 className='text-center font-bold text-xl my-4'>Emotion Summary Chart (Percentage)</h2>
+      <Bar data={chartData} options={options}/>
     </div>
   );
 };
 
-export default EmotionProgressChart;
+export default EmotionSummaryChart;

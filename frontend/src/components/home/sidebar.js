@@ -11,6 +11,8 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
   const goToAssist = () => navigate('/assist');
   const goToVent = () => navigate('/vent');
   const goToProgress = () => navigate('/progress');
+  const goToConsult = () => navigate('/consult');
+  const goToMindcare = () => navigate('/mindcare');
 
 
 
@@ -37,17 +39,17 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
             <FaChartLine className="mr-4" />
             Progress</li>
 
-          <li className="flex items-center px-2 py-4 hover:text-2xl transition-all duration-400 shadow-white text-xl font-medium cursor-pointer">
+          <li className="flex items-center px-2 py-4 hover:text-2xl transition-all duration-400 shadow-white text-xl font-medium cursor-pointer" onClick={goToMindcare}>
             <FaBrain className="mr-4" />
-            <a href="#">MindCare</a></li>
+            MindCare</li>
 
           <li className="flex items-center px-2 py-4 hover:text-2xl transition-all duration-400 shadow-white text-xl font-medium cursor-pointer" onClick={goToVent} >
             <FaComments className="mr-4" />
             Vent</li>
 
-          <li className="flex items-center px-2 py-4 hover:text-2xl transition-all duration-400 shadow-white text-xl font-medium cursor-pointer">
+          <li className="flex items-center px-2 py-4 hover:text-2xl transition-all duration-400 shadow-white text-xl font-medium cursor-pointer" onClick={goToConsult}>
             <FaUserFriends className="mr-4" />
-            <a href="#">Consult</a></li>
+            Consult</li>
 
           <li className="flex items-center px-2 py-4 hover:text-2xl transition-all duration-400 shadow-white text-xl font-medium cursor-pointer">
             <FaPalette className="mr-4" />

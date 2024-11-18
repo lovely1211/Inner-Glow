@@ -3,8 +3,10 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import Auth from './components/authentication/auth';
 import Dashboard from './components/home/dashboard';
 import Assist from './components/home/sidebarComp/assist';
-import Vent from './components/home/sidebarComp/vent';
+import Vent from './components/home/sidebarComp/vent/vent';
 import Progress from './components/home/sidebarComp/progress';
+import Consult from './components/home/sidebarComp/consult';
+import Mindcare from './components/home/sidebarComp/mindcare';
 
 
 const AppRoutes = () => {
@@ -18,6 +20,8 @@ const AppRoutes = () => {
                 <Route path="/assist" element={<Assist />} />
                 <Route path="/vent" element={<Vent />} />
                 <Route path="/progress" element={<Progress />} />
+                <Route path="/consult" element={<Consult />} />
+                <Route path="/mindcare" element={<Mindcare />} />
             </Routes>
         </Router>
     </div>

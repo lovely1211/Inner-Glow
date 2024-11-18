@@ -3,8 +3,8 @@ import { FaUser, FaBars } from "react-icons/fa";
 import Sidebar from './sidebar';
 import Profile from './profile';
 import Emotions from './emotions/emoji';
-import WeeklyChart from './weeklyChart';
-import MonthlyChart from './monthlyChart';
+import WeeklyChart from './charts/weeklyChart';
+import MonthlyChart from './charts/monthlyChart';
 
 const ProfilePopup = ({ onClose }) => {
     return (
