@@ -14,15 +14,15 @@ const getEmotionsForLastSevenDays = async (userId) => {
 
     // Map and count occurrences of each emotion per day
     const dailyEmotions = {};
-    emotions.forEach(emotion => {
-        const dateKey = emotion.date.toISOString().split('T')[0]; // Format date as YYYY-MM-DD
+    emotions.forEach(name => {
+        const dateKey = name.date.toISOString().split('T')[0]; // Format date as YYYY-MM-DD
         if (!dailyEmotions[dateKey]) {
             dailyEmotions[dateKey] = {};
         }
-        if (!dailyEmotions[dateKey][emotion.emotion]) {
-            dailyEmotions[dateKey][emotion.emotion] = 0;
+        if (!dailyEmotions[dateKey][name.name]) {
+            dailyEmotions[dateKey][name.name] = 0;
         }
-        dailyEmotions[dateKey][emotion.emotion]++;
+        dailyEmotions[dateKey][name.name]++;
     });
 
     // Create an array format suitable for charting
@@ -34,10 +34,10 @@ const getEmotionsForLastSevenDays = async (userId) => {
 
         const emotionsCount = dailyEmotions[dateKey] || {};
         if (Object.keys(emotionsCount).length === 0) {
-            result.push({ day: dateKey, emotion: 'undefined', count: 0 });
+            result.push({ day: dateKey, name: 'undefined', count: 0 });
         } else {
-            Object.entries(emotionsCount).forEach(([emotion, count]) => {
-                result.push({ day: dateKey, emotion, count });
+            Object.entries(emotionsCount).forEach(([name, count]) => {
+                result.push({ day: dateKey, name, count });
             });
         }
     }
@@ -58,15 +58,15 @@ const getEmotionsForLastThirtyDays = async (userId) => {
 
     // Map the results to count occurrences of each emoji per day
     const dailyEmotions = {};
-    emotions.forEach(emotion => {
-        const dateKey = emotion.date.toISOString().split('T')[0]; // Format date as YYYY-MM-DD
+    emotions.forEach(name => {
+        const dateKey = name.date.toISOString().split('T')[0]; // Format date as YYYY-MM-DD
         if (!dailyEmotions[dateKey]) {
             dailyEmotions[dateKey] = {};
         }
-        if (!dailyEmotions[dateKey][emotion.emoji]) {
-            dailyEmotions[dateKey][emotion.emoji] = 0;
+        if (!dailyEmotions[dateKey][name.name]) {
+            dailyEmotions[dateKey][name.name] = 0;
         }
-        dailyEmotions[dateKey][emotion.emoji]++;
+        dailyEmotions[dateKey][name.name]++;
     });
 
     // Convert the dailyEmotions object to an array format suitable for the chart
@@ -77,8 +77,8 @@ const getEmotionsForLastThirtyDays = async (userId) => {
         const dateKey = date.toISOString().split('T')[0];
 
         const emojisCount = dailyEmotions[dateKey] || {};
-        Object.entries(emojisCount).forEach(([emoji, count]) => {
-            result.push({ day: dateKey, emotion: emoji, count });
+        Object.entries(emojisCount).forEach(([name, count]) => {
+            result.push({ day: dateKey, name, count });
         });
     }
 

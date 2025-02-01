@@ -11,7 +11,7 @@ router.get('/emotion/last-seven-days/:id', authMiddleware, async (req, res) => {
         const userId = req.params.id;
 
         if (!mongoose.Types.ObjectId.isValid(userId)) {
-            throw new Error('Invalid userId format');
+            throw new Error('Invalid userId format', Error);
         }
         const emotions = await getEmotionsForLastSevenDays(userId);
         if (!emotions) {
