@@ -9,7 +9,16 @@ const CustomTooltip = ({ active, payload }) => {
         const percentage = ((value / total) * 100).toFixed(1);
 
         return (
-            <div className="custom-tooltip" style={{ backgroundColor: '#fff', padding: '4px', color: 'black', borderRadius: '5px', border: '1px solid #ccc' }}>
+            <div
+                className="custom-tooltip"
+                style={{
+                    backgroundColor: '#fff',
+                    padding: '4px',
+                    color: 'black',
+                    borderRadius: '5px',
+                    border: '1px solid #ccc',
+                }}
+            >
                 <p>{`${percentage}%`}</p>
             </div>
         );
@@ -27,33 +36,46 @@ const WeeklyChart = () => {
             try {
                 const userInfo = JSON.parse(localStorage.getItem('userInfo'));
                 const response = await axiosInstance.get(`/emotion/last-seven-days/${userInfo.id}`);
-                setWeeklyData(response.data);  
-                console.log(response.data)
+                setWeeklyData(response.data || []);
             } catch (error) {
                 console.error('Error fetching weekly emotions:', error);
+                setWeeklyData([]);
             } finally {
                 setLoading(false);
             }
-        };        
+        };
         fetchWeeklyEmotions();
     }, []);
 
     const COLORS = ['#0088FE', '#FF8042', '#FFBB28', '#10375C', '#FF5C93', '#A52A2A', '#9400D3', '#605678', '#AB886D', '#4C4B16'];
     const emotionLabels = ['Happy', 'Sad', 'Angry', 'Relaxed', 'Stressed', 'Crying', 'Loving', 'Fear', 'Disgust', 'Surprise'];
 
-    const totalValue = weeklyData.reduce((total, entry) => total + entry.count, 0);
+    // Aggregate and filter data based on emotionLabels
+    const aggregatedData = weeklyData.reduce((acc, entry) => {
+        if (emotionLabels.includes(entry.name)) {
+            const existingEmotion = acc.find((item) => item.name === entry.name);
+            if (existingEmotion) {
+                existingEmotion.value += entry.count;
+            } else {
+                acc.push({ name: entry.name, value: entry.count });
+            }
+        }
+        return acc;
+    }, []);
 
-    const pieData = Array.isArray(weeklyData)
-        ? weeklyData.map((day) => ({
-            name: day.day,
-            value: day.count,
-            emotion: day.emotion,
-            totalValue: totalValue, 
-        }))
-        : [];
+    const totalValue = aggregatedData.reduce((total, entry) => total + entry.value, 0);
 
-        console.log(pieData)
-        
+    // Map each emotion to its corresponding color
+    const pieData = aggregatedData.map((item) => {
+        const emotionIndex = emotionLabels.indexOf(item.name);
+        return {
+            name: item.name,
+            value: item.value,
+            totalValue,
+            color: emotionIndex !== -1 ? COLORS[emotionIndex] : '#CCCCCC',
+        };
+    });
+
     return (
         <div className="m-10">
             <h2 className="text-center mb-4">Weekly Emotional Response</h2>
@@ -73,14 +95,14 @@ const WeeklyChart = () => {
                         labelLine={false}
                     >
                         {pieData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                            <Cell key={`cell-${index}`} fill={entry.color} />
                         ))}
                     </Pie>
                     <Tooltip content={<CustomTooltip />} />
                     <Legend
                         payload={emotionLabels.map((emotion, index) => ({
                             value: emotion,
-                            type: "square",
+                            type: 'square',
                             color: COLORS[index],
                         }))}
                     />

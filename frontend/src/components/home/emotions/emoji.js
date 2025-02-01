@@ -36,9 +36,8 @@ const EmojiCarousel = () => {
     if (storedDate !== today) {
       localStorage.removeItem("selectedEmoji");
       localStorage.removeItem("suggestion");
-      localStorage.setItem("emojiDate", today); // Update to the current date
+      localStorage.setItem("emojiDate", today); 
     } else if (storedEmoji) {
-      // If the date matches today and emoji exists, set it in state
       setSelectedEmoji(storedEmoji);
       setSuggestion(storedSuggestion || "Remember, it's okay to feel this way!");
     }
@@ -78,6 +77,7 @@ const EmojiCarousel = () => {
         const data = response.data;
         setSelectedEmoji(emoji);
         setSuggestion(data.suggestion);
+        localStorage.setItem("emojiName", data.name)
         localStorage.setItem("selectedEmoji", emoji);
         localStorage.setItem("suggestion", data.suggestion);
         localStorage.setItem("emojiDate", new Date().toDateString()); 

@@ -8,8 +8,10 @@ const Profile = ({ onClose }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
-    age: '',
     email: '',
+    specialization: '',
+    experience: '',
+    fees: '',
   });
 
   useEffect(() => {
@@ -20,8 +22,10 @@ const Profile = ({ onClose }) => {
         setUser(parsedUser);
         setFormData({
           name: parsedUser.name || '',
-          age: parsedUser.age || '',
           email: parsedUser.email || '',
+          specialization: parsedUser.specialization || '',
+          experience: parsedUser.experience || '',
+          fees: parsedUser.fees || '',
           
         });
       } catch (e) {
@@ -48,7 +52,7 @@ const Profile = ({ onClose }) => {
 
   const handleSaveClick = async () => {
     try {
-      const response = await axiosInstance.put(`/${user.id}`, formData);
+      const response = await axiosInstance.put(`/doctor/${user.id}`, formData);
       const updatedUser = response.data;
 
       setUser(updatedUser);
@@ -87,20 +91,38 @@ const Profile = ({ onClose }) => {
                     className="border p-1 rounded"
                   />
                 </p>
-                <p><strong>Age: </strong>
-                  <input
-                    type="text"
-                    name="age"
-                    value={formData.age}
-                    onChange={handleChange}
-                    className="border p-1 rounded"
-                  />
-                </p>
                 <p><strong>Email: </strong>
                   <input
                     type="email"
                     name="email"
                     value={formData.email}
+                    onChange={handleChange}
+                    className="border p-1 rounded"
+                  />
+                </p>
+                <p><strong>Specialization: </strong>
+                  <input
+                    type="text"
+                    name="specialization"
+                    value={formData.specialization}
+                    onChange={handleChange}
+                    className="border p-1 rounded"
+                  />
+                </p>
+                <p><strong>Experience (in years): </strong>
+                  <input
+                    type="text"
+                    name="experience"
+                    value={formData.experience}
+                    onChange={handleChange}
+                    className="border p-1 rounded"
+                  />
+                </p>
+                <p><strong>Fees (Rs): </strong>
+                  <input
+                    type="text"
+                    name="fees"
+                    value={formData.fees}
                     onChange={handleChange}
                     className="border p-1 rounded"
                   />
@@ -115,8 +137,10 @@ const Profile = ({ onClose }) => {
             ) : (
               <>
                 <p><strong>Name: </strong> {user.name}</p>
-                <p><strong>Age: </strong> {user.age}</p>
                 <p><strong>Email: </strong> {user.email}</p>
+                <p><strong>Specialization: </strong> {user.specialization}</p>
+                <p><strong>Experience (in years): </strong> {user.experience}</p>
+                <p><strong>Fees (Rs): </strong> {user.fees} per day</p>
                 <div className='flex flex-row justify-between'>
                  <button
                   onClick={handleEditClick}

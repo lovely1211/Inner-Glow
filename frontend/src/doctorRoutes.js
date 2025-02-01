@@ -1,13 +1,12 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Auth from './components/authentication/auth';
-import Dashboard from './components/home/dashboard';
+import Dashboard from './components/dashboardDoctor/dashboard';
 import Assist from './components/commonComp/assist';
-import Vent from './components/home/sidebarComp/vent/vent';
-import Progress from './components/home/sidebarComp/progress';
-import Mindcare from './components/home/sidebarComp/mindcare';
-import Consult from './components/home/sidebarComp/consult/consult';
-
+import NewChat from './components/dashboardDoctor/sidebarComp/newChat';
+import InProcess from './components/dashboardDoctor/sidebarComp/inProcess';
+import Completed from './components/dashboardDoctor/sidebarComp/completed';
+import Consult from './components/dashboardDoctor/sidebarComp/consult';
 
 
 const AppRoutes = () => {
@@ -19,10 +18,10 @@ const AppRoutes = () => {
                 <Route path="/" element={<Dashboard />} /> 
                 <Route path="*" element={<Navigate to="/" replace />} />
                 <Route path="/assist" element={<Assist />} />
-                <Route path="/vent" element={<Vent />} />
+                <Route path="/newchat" element={<NewChat />} />
+                <Route path="/inprocess" element={<InProcess />} />
+                <Route path="/completed" element={<Completed />} />
                 <Route path="/consult" element={<Consult />} />
-                <Route path="/progress" element={<Progress />} />
-                <Route path="/mindcare" element={<Mindcare />} />
             </Routes>
         </Router>
     </div>

@@ -12,6 +12,7 @@ const Mindcare = () => {
             try {
                 const response = await axiosInstance.get(`/suggestions/${userInfo.id}`);
                 setSuggestion(response.data.suggestion);
+                console.log(response)
             } catch (err) {
                 setError('Failed to load suggestion. Please try again later.');
             } finally {

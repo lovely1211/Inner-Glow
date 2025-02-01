@@ -1,6 +1,6 @@
 import React, {useContext} from "react";
 import { useNavigate } from 'react-router-dom';
-import { FaChartLine, FaBrain, FaComments, FaUserFriends, FaPalette, FaShareAlt, FaHandsHelping } from "react-icons/fa"; 
+import { FaChartLine, FaComments, FaUserFriends, FaPalette, FaShareAlt, FaHandsHelping, FaBan } from "react-icons/fa"; 
 import Share from "../commonComp/share";
 import { ThemeContext } from "../commonComp/theme";
 
@@ -9,10 +9,10 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
   const navigate = useNavigate();
 
   const goToAssist = () => navigate('/assist');
-  const goToVent = () => navigate('/vent');
-  const goToProgress = () => navigate('/progress');
+  const goToNewChat = () => navigate('/newchat');
+  const goToChatInProcess = () => navigate('/inprocess');
   const goToConsult = () => navigate('/consult');
-  const goToMindcare = () => navigate('/mindcare');
+  const goToCompleted = () => navigate('/completed');
 
 
 
@@ -35,21 +35,21 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
         <h2 className="text-3xl font-bold">Inner Glow</h2>
         <ul className="mt-12">
 
-          <li className="flex items-center px-2 py-4 hover:text-2xl transition-all duration-400 shadow-white text-xl font-medium cursor-pointer" onClick={goToProgress}>
-            <FaChartLine className="mr-4" />
-            Progress</li>
-
-          <li className="flex items-center px-2 py-4 hover:text-2xl transition-all duration-400 shadow-white text-xl font-medium cursor-pointer" onClick={goToMindcare}>
-            <FaBrain className="mr-4" />
-            MindCare</li>
-
-          <li className="flex items-center px-2 py-4 hover:text-2xl transition-all duration-400 shadow-white text-xl font-medium cursor-pointer" onClick={goToVent} >
-            <FaComments className="mr-4" />
-            Vent</li>
-
           <li className="flex items-center px-2 py-4 hover:text-2xl transition-all duration-400 shadow-white text-xl font-medium cursor-pointer" onClick={goToConsult}>
             <FaUserFriends className="mr-4" />
             Consult</li>
+
+          <li className="flex items-center px-2 py-4 hover:text-2xl transition-all duration-400 shadow-white text-xl font-medium cursor-pointer" onClick={goToNewChat} >
+            <FaComments className="mr-4" />
+            New Chat</li>
+
+          <li className="flex items-center px-2 py-4 hover:text-2xl transition-all duration-400 shadow-white text-xl font-medium cursor-pointer" onClick={goToChatInProcess}>
+            <FaChartLine className="mr-4" />
+            In Process</li>
+
+          <li className="flex items-center px-2 py-4 hover:text-2xl transition-all duration-400 shadow-white text-xl font-medium cursor-pointer" onClick={goToCompleted}>
+            <FaBan className="mr-4" />
+            Completed</li>
 
           <li className="flex items-center px-2 py-4 hover:text-2xl transition-all duration-400 shadow-white text-xl font-medium cursor-pointer">
             <FaPalette className="mr-4" />

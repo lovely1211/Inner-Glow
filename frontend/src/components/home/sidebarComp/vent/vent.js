@@ -2,6 +2,13 @@ import React, { useEffect, useState } from 'react';
 import axiosInstance from '../../../../axiosInstance';
 import ChatHistory from './ventHistory';
 
+const TypingAnimation = () => (
+    <div className="text-center text-gray-500">
+        <span>Typing</span>
+        <span className="animate-pulse">...</span>
+    </div>
+);
+
 const Vent = () => {
     const [messages, setMessages] = useState([]);
     const [userInput, setUserInput] = useState("");
@@ -13,6 +20,13 @@ const Vent = () => {
     const params = new URLSearchParams(window.location.search);
     const initialInput = params.get('input') || '';
 
+    
+    useEffect(() => {
+        const storedHistory = JSON.parse(localStorage.getItem('chatHistory')) || {};
+        console.log(storedHistory)
+        setChatHistory(storedHistory);
+    }, []);
+    
     useEffect(() => {
         const userInfo = JSON.parse(localStorage.getItem("userInfo"));
         const fetchChatHistory = async () => {
@@ -42,13 +56,6 @@ const Vent = () => {
         }, {});
     };
 
-    // Load chat history from localStorage on mount
-    useEffect(() => {
-        const storedHistory = JSON.parse(localStorage.getItem('chatHistory')) || {};
-        setChatHistory(storedHistory);
-    }, []);
-
-    // Save chat history to localStorage whenever it changes
     useEffect(() => {
         if (Object.keys(chatHistory).length > 0) {
             localStorage.setItem('chatHistory', JSON.stringify(chatHistory));
@@ -63,53 +70,28 @@ const Vent = () => {
     }, [initialInput]);
 
     const fetchChatGPTResponse = async (input) => {
-        setLoading(true);
-        const maxRetries = 3;
-        let attempt = 0;
-        let delay = 1000;
-        const userInfo = JSON.parse(localStorage.getItem("userInfo"));  // Get the user info
-    
-        while (attempt < maxRetries) {
-            try {
-                const response = await axiosInstance.post('/chat', {
-                    message: input,
-                    userId: userInfo?.id  // Ensure userId is being sent
-                });
-                const reply = Array.isArray(response.data.reply) && response.data.reply[0].generated_text
-                    ? response.data.reply[0].generated_text
-                    : response.data.reply;
-    
-                setMessages(prevMessages => {
-                    const updatedMessages = [
-                        ...prevMessages,
-                        { type: 'chatgpt', text: reply, timestamp: new Date() }
-                    ]
-                    const currentDate = new Date().toISOString().split('T')[0];
-                    setChatHistory(prevHistory => ({
-                        ...prevHistory,
-                        [currentDate]: updatedMessages
-                    }));
-    
-                    return updatedMessages;
-                });
-                break;
-            } catch (error) {
-                console.error("Error:", error);
-                if (error.response && error.response.status === 429) {
-                    attempt++;
-                    await new Promise(resolve => setTimeout(resolve, delay));
-                    delay *= 2;
-                } else {
-                    setMessages(prevMessages => [
-                        ...prevMessages,
-                        { type: 'error', text: "Error: Unable to fetch response." }
-                    ]);
-                    break;
-                }
-            }
+        const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+        if (!userInfo?.id) {
+            setMessages(prevMessages => [...prevMessages, { type: 'error', text: "User ID is missing" }]);
+            return;
         }
-        setLoading(false);
-    };            
+    
+        setLoading(true); // Start typing animation
+    
+        try {
+            const response = await axiosInstance.post('/chat', {
+                message: input,
+                userId: userInfo.id
+            });
+            const reply = response.data.reply || "No reply generated";
+            setMessages(prevMessages => [...prevMessages, { type: 'chatgpt', text: reply, timestamp: new Date() }]);
+        } catch (error) {
+            console.error("Error:", error);
+            setMessages(prevMessages => [...prevMessages, { type: 'error', text: "Error: Unable to fetch response." }]);
+        } finally {
+            setLoading(false); // Stop typing animation
+        }
+    };
 
     const handleSend = () => {
         if (!userInput || loading) return;
@@ -118,7 +100,6 @@ const Vent = () => {
         setMessages(prevMessages => {
             const updatedMessages = [...prevMessages, newMessage];
 
-            // Save the new user message to history
             const currentDate = new Date().toISOString().split('T')[0];
             setChatHistory(prevHistory => ({
                 ...prevHistory,
@@ -142,7 +123,6 @@ const Vent = () => {
         setChatHistory(groupedMessages);
     }, [messages]);
 
-    // Select date for chat view
     const handleDateClick = (date) => {
         setSelectedDate(date);
     };
@@ -151,24 +131,21 @@ const Vent = () => {
         <div className="flex">
             {error ? <p>{error}</p> : <ChatHistory chatHistory={chatHistory} onDateClick={handleDateClick} />}
 
-            {/* Main Chat Section */}
             <div className="w-2/3 p-4 h-screen flex flex-col">
                 <h2 className="text-2xl text-center font-semibold mt-4">Chat with Me</h2>
                 <div className="flex-1 mt-6 overflow-y-auto">
                     <div className="space-y-4">
-                    {(selectedDate ? chatHistory[selectedDate] : messages).map((message, index) => (
-                        <div
-                            key={index}
-                            className={`${message.type === 'user' ? 'text-right ' : 'text-left '}`}
-                        >
-                            <div className={`${message.type === 'user' ? ' bg-blue-400' : 'bg-gray-600'} p-2 text-white rounded-lg inline-block max-w-1/2`}
-                            >
-                            {typeof message.text === 'string' ? message.text : JSON.stringify (message.text)}
+                        {(selectedDate ? chatHistory[selectedDate] || [] : messages || []).map((message, index) => (
+                            <div key={index} className={`${message.type === 'user' ? 'text-right' : 'text-left'}`}>
+                                <div
+                                    className={`${message.type === 'user' ? 'bg-blue-400' : 'bg-gray-600'} p-2 text-white rounded-lg inline-block max-w-1/2`}
+                                >
+                                    {typeof message.text === 'string' ? message.text : JSON.stringify(message.text)}
+                                </div>
                             </div>
-                        </div>
-                    ))}
+                        ))}
 
-                        {loading && <div className="text-center text-gray-300">...</div>}
+                        {loading && <TypingAnimation />}
                     </div>
                 </div>
                 <div className="flex my-4 space-x-2">
