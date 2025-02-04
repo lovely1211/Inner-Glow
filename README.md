@@ -40,8 +40,18 @@
    npm start
    ```
 
-## 📸 Screenshots (Optional)
-![Screenshot (150)](https://github.com/user-attachments/assets/32b88134-b3fd-4b77-8940-50bde65bc53f)
+## 📸 Screenshots
+
+![Screenshot (187)](https://github.com/user-attachments/assets/c59fd334-2bb5-47a6-b59e-0912b3c29cd6)
+![Screenshot (179)](https://github.com/user-attachments/assets/2058ae6a-99aa-4324-ac7a-8839f948041a)
+![Screenshot (150)](https://github.com/user-attachments/assets/7b82d40a-b6aa-4f4c-b36d-f5826b7eb86b)
+![Screenshot (180)](https://github.com/user-attachments/assets/c1db1cf3-af43-4a70-9a0b-bd5d994733c8)
+![Screenshot (181)](https://github.com/user-attachments/assets/0eb30d94-f14a-46ed-a5e5-f74e97a97c8f)
+![Screenshot (182)](https://github.com/user-attachments/assets/e9bcdae5-a3e0-4742-8f19-f703784f990b)
+![Screenshot (183)](https://github.com/user-attachments/assets/36b4e28f-5902-47f1-9e03-97e1f3edccee)
+![Screenshot (184)](https://github.com/user-attachments/assets/2714e4b4-1c13-4faf-bb09-9ab68ae75b89)
+![Screenshot (185)](https://github.com/user-attachments/assets/bc942143-748e-4017-a904-d05f7ac4a46b)
+![Screenshot (186)](https://github.com/user-attachments/assets/c2c9b342-9556-453b-bf29-efe43b9efedf)
 
 
 ## 🤝 Contributing
