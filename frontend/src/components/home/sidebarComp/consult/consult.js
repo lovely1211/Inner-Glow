@@ -1,137 +1,108 @@
 import React, { useState, useEffect } from 'react';
-import axiosInstance from '../../../../axiosInstance';
-import socket from "../../../commonComp/socket";
+import axiosInstance from '../../../../axiosInstance'; // Ensure this instance is properly set up
+import socket from "../../../commonComp/socket"; // Ensure socket instance is correctly set up
 
-const TypingAnimation = () => (
-  <div className="text-center text-gray-500">
-    <span>Typing</span>
-    <span className="animate-pulse">...</span>
-  </div>
-);
+// const TypingAnimation = () => (
+//   <div className="text-center text-gray-500">
+//     <span>Typing</span>
+//     <span className="animate-pulse">...</span>
+//   </div>
+// );
 
 const Consult = () => {
-  const [users, setUsers] = useState([]);
-  const [messages, setMessages] = useState([]);
-  const [userInput, setUserInput] = useState('');
-  const [selectedDoctor, setSelectedDoctor] = useState(null);
-  const [chatHistory, setChatHistory] = useState({});
-  const [loading, setLoading] = useState(false);
+  const [users, setUsers] = useState([]); // List of doctors
+  const [messages, setMessages] = useState([]); // All messages
+  const [userInput, setUserInput] = useState(''); // User input message
+  const [selectedDoctor, setSelectedDoctor] = useState(null); // Selected doctor
+  const [loading, setLoading] = useState(false); // Typing indicator
+  const userInfo = JSON.parse(localStorage.getItem('userInfo')); 
+  const senderId = userInfo ? userInfo.id : null; 
 
+  // Fetch all messages when the component mounts
+  useEffect(() => {
+    if (selectedDoctor) {
+      axiosInstance.get(`/messages/${senderId}/${selectedDoctor._id}`)
+        .then((res) => {
+          setMessages(res.data);
+        })
+        .catch((err) => console.log('Error fetching messages:', err));
+    }
+
+    const handleMessage = (newMessage) => {
+      setMessages((prev) => [...prev, newMessage]);
+    };
+  
+    socket.on("receiveMessage", handleMessage);
+  
+    return () => {
+      socket.off("receiveMessage", handleMessage);
+    };
+
+  }, [selectedDoctor, senderId]);
+
+  // Fetch all doctors
   useEffect(() => {
     const fetchAllUsers = async () => {
       try {
         const response = await axiosInstance.get('/doctor');
         setUsers(response.data);
       } catch (err) {
-        console.log('Error fetching users:', err);
+        console.log('Error fetching doctors:', err);
       }
     };
     fetchAllUsers();
   }, []);
 
-  useEffect(() => {
-    const handleMessage = (message) => {
-      setMessages((prev) => [...prev, message]);
-    };
-  
-    socket.on("message", handleMessage);
-  
-    return () => {
-      socket.off("message", handleMessage);
-    };
-  }, [selectedDoctor]);  
-  
-  const userInfo = JSON.parse(localStorage.getItem("userInfo"));
-  const userId = userInfo ? userInfo.id : null;
-
-  useEffect(() => {
-    const fetchMessages = async () => {
-
-      if (!selectedDoctor || !userId) return;
-  
-      try {
-        const response = await axiosInstance.get(`/getMessages/${userId}/${selectedDoctor._id}`);
-        setMessages(response.data.messages || []);
-      } catch (error) {
-        console.log("Error fetching messages:", error);
-      }
-    };
-  
-    fetchMessages();
-  }, [selectedDoctor, userId]);
-
-  useEffect(() => {
-    if (selectedDoctor?._id) {
-      setMessages(chatHistory[selectedDoctor._id] || []);
-    }
-  }, [selectedDoctor, chatHistory]);
-
+  // Handle doctor selection
   const handleDoctorClick = (doctor) => {
     setSelectedDoctor(doctor);
   };
 
-  const handleSend = async () => {
-    if (!userInput || loading) return;
+  // Handle sending message
+  const handleSend = (e) => {
+    if (!userInput || loading || !selectedDoctor) return;
   
-    const newMessage = {
-      sender: "user",
+    e.preventDefault();
+  
+    const messageData = {
+      senderId: senderId, 
+      receiverId: selectedDoctor._id, 
       text: userInput,
-      timestamp: new Date(),
+      sender: 'user', 
+      receiver: 'doctor', 
     };
   
-    setMessages((prevMessages) => [...prevMessages, newMessage]);
+    // Send the message via socket
+    socket.emit("sendMessage", messageData);
   
-    const userInfo = JSON.parse(localStorage.getItem("userInfo"));
-    const userId = userInfo ? userInfo.id : null;
+    // Update UI immediately
+    setMessages((prevMessages) => [...prevMessages, messageData]);
   
-    if (!userId || !selectedDoctor?._id) {
-      console.error("User ID or Doctor ID missing");
-      return;
-    }
-  
-    try {
-      const response = await axiosInstance.post("/sendMessage", {
-        userId: userId,
-        doctorId: selectedDoctor._id,
-        sender: "user",
-        text: userInput,
-      });
-  
-      console.log("Response from server:", response.data); // Yeh console zaroor check karna
-  
-      socket.emit("message", {
-        userId,
-        doctorId: selectedDoctor._id,
-        sender: "user",
-        text: userInput,
-      });
-  
-      setUserInput("");
-    } catch (error) {
-      console.error("Error sending message:", error);
-    }
+    // Reset input after sending the message
+    setUserInput("");
   };  
-  
-  // Listen for typing event
+
+  // Handle typing event
   useEffect(() => {
     let typingTimeout;
-  
+
     socket.on("typing", (data) => {
-      if (data.doctorId === selectedDoctor?._id) {
+      if (data.receiverId === selectedDoctor?._id) {
         setLoading(true);
         clearTimeout(typingTimeout);
         typingTimeout = setTimeout(() => setLoading(false), 2000);
       }
     });
-  
+
     return () => {
       socket.off("typing");
       clearTimeout(typingTimeout);
     };
-  }, [selectedDoctor]);  
+  }, [selectedDoctor]);
 
   return (
     <div className='flex'>
+      {/* Doctor List */}
       <div className="w-1/3 p-4 border-r border-gray-300 h-screen overflow-y-auto">
         <h2 className="text-xl font-semibold mb-4">Choose a Doctor</h2>
         <ul>
@@ -139,7 +110,9 @@ const Consult = () => {
             users.map((user) => (
               <li
                 key={user._id}
-                className={`p-2 flex justify-between cursor-pointer shadow-white border-b ${selectedDoctor?._id === user._id ? 'bg-gray-200' : ''}`}
+                className={`p-2 flex justify-between cursor-pointer shadow-white border-b ${
+                  selectedDoctor?._id === user._id ? 'bg-gray-200' : ''
+                }`}
                 onClick={() => handleDoctorClick(user)}
               >
                 <span className="font-bold">{user.name}</span>
@@ -154,27 +127,37 @@ const Consult = () => {
         </ul>
       </div>
 
+      {/* Chat Box */}
       <div className="w-2/3 p-4 h-screen flex flex-col">
-        <h2 className="text-center font-bold text-xl my-4">Consult to a Doctor for your problems</h2>
+        <h2 className="text-center font-bold text-xl my-4">
+          Consult a Doctor for your problems
+        </h2>
         <h2>Chat with {selectedDoctor?.name || "..."}</h2>
 
+        {/* Messages */}
         <div className="flex-1 mt-6 overflow-y-auto">
           {selectedDoctor ? (
             <div className="space-y-4">
-              {messages.map((message, index) => (
-                <div key={index} className={`flex ${message.sender === 'user' ? 'justify-start' : 'justify-end'}`}>
-                  <div className={`p-2 text-white rounded-lg inline-block max-w-2/3 ${message.sender === 'user' ? 'bg-blue-500' : 'bg-gray-600'}`}>
-                    {message.text}
+              {messages.length > 0 ? (
+                messages.map((message, index) => (
+                  <div key={index} className={`flex ${message.senderId === senderId ? 'justify-end' : 'justify-start'}`}>
+                    <div className={`p-2 text-white rounded-lg inline-block max-w-2/3 ${message.senderId === senderId ? 'bg-blue-500' : 'bg-gray-600'}`}>
+                      {message.text}
+                    </div>
                   </div>
-                </div>
-              ))}
-              {loading && <TypingAnimation />}
+                ))                
+              ) : (
+                <div>No messages yet...</div>
+              )}
             </div>
           ) : (
-            <div className="text-center text-gray-500 mt-10 text-lg">Select a mentor and start chatting...</div>
+            <div className="text-center text-gray-500 mt-10 text-lg">
+              Select a doctor and start chatting...
+            </div>
           )}
         </div>
 
+        {/* Input Field */}
         {selectedDoctor && (
           <div className="flex my-4 space-x-2">
             <input
