@@ -31,11 +31,27 @@
    ```bash
    cd Inner-Glow
    ```
-3. **Install dependencies:**  
+3. **Navigate to the backend:**  
+   ```bash
+   cd backend
+   ```
+4. **Install dependencies:**  
    ```bash
    npm install
    ```
-4. **Start the development server:**  
+5. **Start the development server:**  
+   ```bash
+   npm run dev
+   ```
+6. **Navigate to the frontend:**  
+   ```bash
+   cd frontend
+   ```
+7. **Install dependencies:**  
+   ```bash
+   npm install
+   ```
+8. **Start Script:**  
    ```bash
    npm start
    ```
